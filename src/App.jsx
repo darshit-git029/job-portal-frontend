@@ -21,7 +21,7 @@ function App() {
 
     //user route
     {
-      path:'/home',
+      path:'/',
       element:<Home/>
     },
     {

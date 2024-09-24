@@ -14,15 +14,18 @@ import { Loader2 } from "lucide-react";
 
 const Login = () => {
 
-    const {loading,user} = useSelector(store=>store.auth)
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
+  const { loading, user } = useSelector(store => store.auth);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [input, setInput] = useState({
     email: "",
     password: "",
     role: "",
   });
+
+  const [errors, setErrors] = useState({});
+
   const changeEventHandler = (e) => {
     setInput({
       ...input,
@@ -30,41 +33,63 @@ const Login = () => {
     });
   };
 
+  const validate = () => {
+    let errors = {};
 
-const submitHandler = async (e) => {
+    if (!input.email) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(input.email)) {
+      errors.email = "Email address is invalid";
+    }
+
+    if (!input.password) {
+      errors.password = "Password is required";
+    } else if (input.password.length < 2) {
+      errors.password = "Password must be at least 6 characters long";
+    }
+
+    if (!input.role) {
+      errors.role = "Role is required";
+    }
+
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const submitHandler = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
     try {
-      dispatch(setLoading(true))
+      dispatch(setLoading(true));
       const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
         headers: {
           "Content-Type": "application/json",
         },
-        // withCredentials: true,
       });
 
-      if(res.data.success){
-        dispatch(setUser(res.data.data.user))
-        dispatch(setToken(res.data.data.token))
+      if (res.data.success) {
+        dispatch(setUser(res.data.data.user));
+        dispatch(setToken(res.data.data.token));
         localStorage.setItem("authToken", res.data.data.token);
-        console.log(res.data.data.user);
-        
-        toast.success(res.data.message)
-        navigate('/Home')
+
+        toast.success(res.data.message);
+        navigate("/");
       }
     } catch (error) {
       console.error("Error occurred:", error.message);
-      toast.error(error.response.data.message)
-    }
-    finally{
-      dispatch(setLoading(false))
+      toast.error(error.response.data.message);
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
-  useEffect(() =>{
-    if(user){
-      navigate("/home")
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+      toast.error("you have already login")
     }
-  },[])
+  }, []);
 
   return (
     <div>
@@ -76,7 +101,7 @@ const submitHandler = async (e) => {
         >
           <h1 className="font-bold text-xl md-2">Login</h1>
           <div className="my-2">
-            <Label for="email">Email</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               type="email"
               value={input.email}
@@ -84,19 +109,20 @@ const submitHandler = async (e) => {
               onChange={changeEventHandler}
               id="email"
               placeholder="darshit@gmail.com"
-              autofocus
-            ></Input>
+              autoFocus
+            />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
           <div className="my-2">
-            <Label for="password">password</Label>
+            <Label htmlFor="password">Password</Label>
             <Input
               type="password"
               id="password"
               value={input.password}
               name="password"
               onChange={changeEventHandler}
-              autofocus
-            ></Input>
+            />
+            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
           </div>
           <div className="flex items-center justify-between">
             <RadioGroup className="flex items-center gap-4 my-2">
@@ -123,12 +149,18 @@ const submitHandler = async (e) => {
                 <Label htmlFor="option-two">Recruiter</Label>
               </div>
             </RadioGroup>
+            {errors.role && <p className="text-red-500 text-sm">{errors.role}</p>}
           </div>
-          {
-            loading ? <Button className="w-full my-4"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Please Wait</Button> :<Button className="w-full my-4" type="submit">
-            Login
-          </Button>
-          }
+          {loading ? (
+            <Button className="w-full my-4">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Please Wait
+            </Button>
+          ) : (
+            <Button className="w-full my-4" type="submit">
+              Login
+            </Button>
+          )}
           <span className="text-sm">
             Dont have an account?{" "}
             <Link to="/Signup" className="text-blue-600 text-sm">

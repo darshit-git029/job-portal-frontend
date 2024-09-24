@@ -9,13 +9,13 @@ import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import axios from "axios"
 import { USER_API_END_POINT } from "@/utils/costent"
-import {  setUser } from "@/redux/authSlice"
+import { setUser } from "@/redux/authSlice"
 import { toast } from "sonner"
 
 const UpdateProfileDailog = ({ open, setOpen }) => {
     const [loading, setLoading] = useState(false);
-    
-    const { user } = useSelector(store=>store.auth)
+
+    const { user } = useSelector(store => store.auth)
 
 
     const [input, setInput] = useState({
@@ -26,7 +26,19 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
         skills: user?.profile?.skills?.map(skill => skill),
         file: user?.profile?.resume
     })
+    const [errors, setErrors] = useState({});
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!input.file) newErrors.file = "*file is required";
+        if (!/\S+@\S+\.\S+/.test(input.email)) newErrors.email = "*Invalid email";
+        if (input.phoneNumber && !/^\d{10}$/.test(input.phoneNumber))
+            newErrors.phoneNumber = "*Invalid phone number";
+
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
 
     const changeEventHandler = (e) => {
@@ -42,9 +54,13 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
 
     // const { token } = useSelector(store => store.auth);
     const token = useSelector(state => state.auth.token) || localStorage.getItem('authToken');
-    
+
     const submitHandler = async (e) => {
         e.preventDefault()
+
+        if (!validateForm()) {
+            return;
+        }
         setLoading(true); // Start loading
 
         const formData = new FormData()
@@ -61,35 +77,35 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
         try {
 
             if (!token) {
-                throw new Error("Token not found, please login again.");
+                throw new Error("User not authenticate, please login again.");
             }
             console.log({
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "multipart/form-data"
-              });
-          
+            });
+
             const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
                 headers: {
                     "Authorization": `Bearer ${token || localStorage.getItem('authToken')}`, // Use token from Redux or localStorage
                     "Content-Type": "multipart/form-data"
-                 },
-                })
+                },
+            })
 
-                console.log('Response data:', res.data);
+            console.log('Response data:', res.data);
 
             if (res.data.success) {
                 dispatch(setUser(res.data.user))
                 toast.success(res.data.message)
             }
         } catch (error) {
-          console.log(error);
-          toast.error(error.response.data.message)
-          
+            console.log(error);
+            toast.error(error.response.data.message)
+
         } finally {
             setLoading(false); // Stop loading
             setOpen(false);
         }
-        
+
     }
 
     return (
@@ -110,6 +126,9 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                     onChange={changeEventHandler}
                                     className="col-span-3"
                                 />
+                                {errors.fullName && (
+                                    <span className="text-red-500 text-sm">{errors.fullName}</span>
+                                )}
                             </div>
                         </div>
                         <div className="grid gap-4 py-4">
@@ -122,6 +141,9 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                     onChange={changeEventHandler}
                                     className="col-span-3"
                                 />
+                                {errors.email && (
+                                    <span className="text-red-500 text-sm">{errors.email}</span>
+                                )}
                             </div>
                         </div>
                         <div className="grid gap-4 py-4">
@@ -134,6 +156,9 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                     onChange={changeEventHandler}
                                     className="col-span-3"
                                 />
+                                {errors.phoneNumber && (
+                                    <span className="text-red-500 text-sm">{errors.phoneNumber}</span>
+                                )}
                             </div>
                         </div>
                         <div className="grid gap-4 py-4">
@@ -171,6 +196,9 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                     onChange={fileChangeHandler}
                                     className="col-span-3"
                                 />
+                                {errors.file && (
+                                    <span className="text-red-500 text-sm">{errors.file}</span>
+                                )}
                             </div>
                         </div>
                         <DialogFooter>

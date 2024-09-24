@@ -23,7 +23,7 @@ const Navbar = () => {
       if (res.data.success) {
         dispatch(setUser(null))
         dispatch(setToken(null))
-        navigate('/home')
+        navigate('/')
         toast.success(res.data.message)
       }
     } catch (error) {
@@ -53,7 +53,7 @@ const Navbar = () => {
               </>) : (
                 <>
                   <li>
-                    <Link to="/home">Home</Link>
+                    <Link to="/">Home</Link>
                   </li>
                   <li>
                     <Link to="/jobs">Jobs</Link>

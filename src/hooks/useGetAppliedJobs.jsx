@@ -3,7 +3,6 @@ import { APPLYJOB_API_END_POINT } from "@/utils/costent";
 import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "sonner";
 
 const useGetAppliedJobs = () => {
     const dispatch = useDispatch();
@@ -21,13 +20,7 @@ const useGetAppliedJobs = () => {
                 });
 
                 if (res.data.success) {
-                    // Display success toast notification
-                    toast.success(res.data.message);
-
-                    // Log fetched applied jobs
                     console.log("Applied jobs fetched:", res.data.application);
-
-                    // Dispatch the action to set all applied jobs in Redux state
                     dispatch(setAllAppliedJobs(res.data.application));
                 }
             } catch (error) {
@@ -35,9 +28,8 @@ const useGetAppliedJobs = () => {
             }
         };
 
-        // Invoke the function to fetch applied jobs
         fetchAppliedJob();
-    }, [dispatch, token]); // Add dependencies here
+    }, [dispatch, token]);
 }
 
 export default useGetAppliedJobs;

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../shared/navbar";
 import { Button } from "../ui/button";
@@ -21,10 +22,10 @@ const Signup = () => {
     role: "",
     file: "",
   });
+  const [errors, setErrors] = useState({});
 
-  const {loading,user} = useSelector(store=>store.auth)
+  const { loading, user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
   const changeEventHandler = (e) => {
@@ -38,8 +39,30 @@ const Signup = () => {
     setInput({ ...input, file: e.target.files?.[0] });
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!input.fullName) newErrors.fullName = "*Full name is required";
+    if (!input.email) newErrors.email = "*Email is required";
+    if (!/\S+@\S+\.\S+/.test(input.email)) newErrors.email = "*Invalid email";
+    if (!input.phoneNumber) newErrors.phoneNumber = "*Phone number is required";
+    if (input.phoneNumber && !/^\d{10}$/.test(input.phoneNumber))
+      newErrors.phoneNumber = "*Invalid phone number";
+    if (!input.password) newErrors.password = "*Password is required";
+    if (input.password && input.password.length < 6)
+      newErrors.password = "*Password must be at least 6 characters";
+    if (!input.role) newErrors.role = "*Please select a role";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     const formData = new FormData();
     formData.append("fullName", input.fullName);
     formData.append("email", input.email);
@@ -51,36 +74,30 @@ const Signup = () => {
     }
 
     try {
-      dispatch(setLoading(true))
+      dispatch(setLoading(true));
       const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-        // withCredentials: true,
       });
-      console.log(res);
-      
       if (res.data.success) {
-        console.log(formData);
         navigate("/login");
         toast.success(res.data.message);
-        
-    }
-} catch (error) {
+      }
+    } catch (error) {
       console.error("Error occurred:", error.message);
       toast.error(error.response.data.message);
-    }
-    finally{
-      dispatch(setLoading(false))
-
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
-  useEffect(() =>{
-    if(user){
-      navigate("/home")
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+      toast.error("you have already signup")
     }
-  },[])
+  }, []);
 
   return (
     <div>
@@ -91,8 +108,9 @@ const Signup = () => {
           className="w-1/2 border border-gray-200 rounded-md p-4 my-10"
         >
           <h1 className="font-bold text-xl md-2">Sign Up</h1>
+
           <div className="my-2">
-            <Label for="name">Full Name</Label>
+            <Label htmlFor="name">Full Name</Label>
             <Input
               type="text"
               value={input.fullName}
@@ -100,11 +118,15 @@ const Signup = () => {
               onChange={changeEventHandler}
               id="name"
               placeholder="darshit patel"
-              autofocus
-            ></Input>
+              autoFocus
+            />
+            {errors.fullName && (
+              <span className="text-red-500 text-sm">{errors.fullName}</span>
+            )}
           </div>
+
           <div className="my-2">
-            <Label for="email">Email</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               type="email"
               value={input.email}
@@ -112,11 +134,14 @@ const Signup = () => {
               onChange={changeEventHandler}
               id="email"
               placeholder="darshit@gmail.com"
-              autofocus
-            ></Input>
+            />
+            {errors.email && (
+              <span className="text-red-500 text-sm">{errors.email}</span>
+            )}
           </div>
+
           <div className="my-2">
-            <Label for="phone">PhoneNumber</Label>
+            <Label htmlFor="phone">Phone Number</Label>
             <Input
               type="text"
               value={input.phoneNumber}
@@ -124,20 +149,26 @@ const Signup = () => {
               onChange={changeEventHandler}
               id="phone"
               placeholder="0000000000"
-              autofocus
-            ></Input>
+            />
+            {errors.phoneNumber && (
+              <span className="text-red-500 text-sm">{errors.phoneNumber}</span>
+            )}
           </div>
+
           <div className="my-2">
-            <Label for="password">password</Label>
+            <Label htmlFor="password">Password</Label>
             <Input
               type="password"
               id="password"
-              autofocus
               value={input.password}
               name="password"
               onChange={changeEventHandler}
-            ></Input>
+            />
+            {errors.password && (
+              <span className="text-red-500 text-sm">{errors.password}</span>
+            )}
           </div>
+
           <div className="flex items-center justify-between">
             <RadioGroup className="flex items-center gap-4 my-5">
               <div className="flex items-center space-x-2">
@@ -149,7 +180,7 @@ const Signup = () => {
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label htmlFor="option-one">Student</Label>
+                <Label htmlFor="student">Student</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Input
@@ -160,9 +191,13 @@ const Signup = () => {
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label htmlFor="option-two">Recruiter</Label>
+                <Label htmlFor="recruiter">Recruiter</Label>
               </div>
             </RadioGroup>
+            {errors.role && (
+              <span className="text-red-500 text-sm">{errors.role}</span>
+            )}
+
             <div className="flex items-center gap-2">
               <Label>Profile</Label>
               <Input
@@ -173,11 +208,18 @@ const Signup = () => {
               />
             </div>
           </div>
-          {
-            loading ? <Button className="w-full my-4"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Please Wait</Button> :<Button className="w-full my-4" type="submit" onChange={submitHandler}>
-          Sign Up
-          </Button>
-          }
+
+          {loading ? (
+            <Button className="w-full my-4">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Please Wait
+            </Button>
+          ) : (
+            <Button className="w-full my-4" type="submit">
+              Sign Up
+            </Button>
+          )}
+
           <span className="text-sm">
             Already have an account?{" "}
             <Link to="/Login" className="text-blue-600 text-sm">
