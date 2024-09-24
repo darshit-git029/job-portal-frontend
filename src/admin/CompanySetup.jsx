@@ -12,7 +12,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 
 const CompanySetup = () => {
-    
+
     const params = useParams();
     useGetCompanyById(params.id)
 
@@ -26,54 +26,68 @@ const CompanySetup = () => {
         website: "",
         location: "",
         file: null
-    })
+    });
 
-    const { singleCompany } = useSelector(store => store.company)
+    const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!input.name.trim()) newErrors.name = "*Company name is required";
+        if (!input.description.trim()) newErrors.description = "*Description is required";
+        if (!input.location.trim()) newErrors.location = "*Location is required";
+        if (!input.website.trim()) newErrors.website = "*Website is required";
+        if (!input.file) newErrors.file = "*Company logo is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const changeEventHandler = (e) => {
-        e.preventDefault();
-        setInput({ ...input, [e.target.name]: e.target.value })
-    }
+        setInput({ ...input, [e.target.name]: e.target.value });
+    };
 
     const changeFileHandler = (e) => {
-        const file = e.target.files?.[0]
-        setInput({ ...input, file })
-    }
+        const file = e.target.files?.[0];
+        setInput({ ...input, file });
+    };
 
     const submitHandler = async (e) => {
-        e.preventDefault()
-        const formData = new FormData()
-        formData.append("name", input.name)
-        formData.append("description", input.description)
-        formData.append("website", input.website)
-        formData.append("location", input.location)
+        e.preventDefault();
+
+        if (!validateForm()) {
+            return; // Exit if validation fails
+        }
+
+        const formData = new FormData();
+        formData.append("name", input.name);
+        formData.append("description", input.description);
+        formData.append("website", input.website);
+        formData.append("location", input.location);
         if (input.file) {
-            formData.append("file", input.file)
+            formData.append("file", input.file);
         }
 
         try {
-            setLoading(true)
+            setLoading(true);
             const res = await axios.put(`${REGISTERCOMPANY_API_END_POINT}/update/${params.id}`, formData, {
                 headers: {
-                    "Authorization": `Bearer ${token || localStorage.getItem('authToken')}`, // Use token from Redux or localStorage
+                    "Authorization": `Bearer ${token || localStorage.getItem('authToken')}`,
                     "Content-Type": "multipart/form-data"
                 },
-            })
+            });
             if (res.data.success) {
-                console.log(res.data.company)
-                toast.success(res.data.message)
-                navigate("/admin/companies")
+                toast.success(res.data.message);
+                navigate("/admin/companies");
             }
         } catch (error) {
-            const errorMessage =
-                error?.response?.data?.message
+            const errorMessage = error?.response?.data?.message || "Something went wrong!";
             toast.error(errorMessage);
+        } finally {
+            setLoading(false);
         }
-        finally {
-            setLoading(false)
-        }
-    }
-
+    };
+    const { singleCompany } = useSelector(store => store.company)
     useEffect(() => {
         setInput({
             name: singleCompany.name || "",
@@ -81,8 +95,8 @@ const CompanySetup = () => {
             website: singleCompany.website || "",
             location: singleCompany.location || "",
             file: singleCompany.file || null
-        })
-    }, [singleCompany])
+        });
+    }, [singleCompany]);
 
     return (
         <div>
@@ -98,7 +112,7 @@ const CompanySetup = () => {
                             Company Set-Up
                         </h1>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 ">
+                    <div className="grid grid-cols-2 gap-4">
                         <div className="">
                             <Label>Company Name</Label>
                             <Input
@@ -107,6 +121,7 @@ const CompanySetup = () => {
                                 value={input.name}
                                 onChange={changeEventHandler}
                             />
+                            {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                         </div>
                         <div className="">
                             <Label>Description</Label>
@@ -116,17 +131,19 @@ const CompanySetup = () => {
                                 value={input.description}
                                 onChange={changeEventHandler}
                             />
-
-                        </div>  <div className="">
+                            {errors.description && <span className="text-red-500 text-sm">{errors.description}</span>}
+                        </div>
+                        <div className="">
                             <Label>Location</Label>
                             <Input
                                 type="text"
                                 value={input.location}
                                 name="location"
                                 onChange={changeEventHandler}
-
                             />
-                        </div>  <div className="">
+                            {errors.location && <span className="text-red-500 text-sm">{errors.location}</span>}
+                        </div>
+                        <div className="">
                             <Label>Website</Label>
                             <Input
                                 type="text"
@@ -134,27 +151,32 @@ const CompanySetup = () => {
                                 value={input.website}
                                 onChange={changeEventHandler}
                             />
+                            {errors.website && <span className="text-red-500 text-sm">{errors.website}</span>}
                         </div>
                         <div className="">
                             <Label>Logo</Label>
                             <Input
                                 type="file"
-                                name="logo"
+                                name="file"
                                 accept="image/*"
                                 onChange={changeFileHandler}
                             />
+                            {errors.file && <span className="text-red-500 text-sm">{errors.file}</span>}
                         </div>
                     </div>
-                    {
-                        loading ? <Button className="w-full my-4"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Please Wait</Button> : <Button className="w-full my-4" type="submit">
+                    {loading ? (
+                        <Button className="w-full my-4">
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />Please Wait
+                        </Button>
+                    ) : (
+                        <Button className="w-full my-4" type="submit">
                             Submit
                         </Button>
-                    }
-
+                    )}
                 </form>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default CompanySetup
+export default CompanySetup;

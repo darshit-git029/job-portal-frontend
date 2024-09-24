@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../shared/navbar";
 import { Button } from "../ui/button";
@@ -172,5 +173,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;

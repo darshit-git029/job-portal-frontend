@@ -29,6 +29,9 @@ const JobDescription = () => {
 
     const applyjobApplication = async () => {
         try {
+            if(user){
+
+            
             const res = await axios.get(`${APPLYJOB_API_END_POINT}/apply/${jobId}`, {
                 headers: {
                     "Authorization": `Bearer ${token || localStorage.getItem('authToken')}`, // Use token from Redux or localStorage
@@ -40,7 +43,8 @@ const JobDescription = () => {
                 const updateSingleJob = {...singlejob, application:[...singlejob.application,{applicant:user?._id}]}
                 dispatch(setSingleJob(updateSingleJob)) 
                 toast.success(res.data.message)
-            }
+            }}else(toast.error("Please Login to Apply for this job")
+            )
         } catch (error) {
             toast.error(error.response.data.message)
             console.log(error);
@@ -91,7 +95,7 @@ const JobDescription = () => {
                     </div>
                 </div>
                 <Button
-                    onClick={isAplly ? null : applyjobApplication}  // Pass function reference
+                    onClick={isAplly ? null : applyjobApplication} 
                     disabled={isAplly}
                     className={`rounded-lg ${isAplly ? 'bg-gray-600 cursor-not-allowed hover:bg-gray-600' : 'bg-[#6A38c2] hover:bg-[#482782]'}`}
                 >

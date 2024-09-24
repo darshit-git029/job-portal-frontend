@@ -1,22 +1,20 @@
 /* eslint-disable react/prop-types */
-
-import { Loader2 } from "lucide-react"
-import { Button } from "./ui/button"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-import { useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import axios from "axios"
-import { USER_API_END_POINT } from "@/utils/costent"
-import { setUser } from "@/redux/authSlice"
-import { toast } from "sonner"
+import { Loader2 } from "lucide-react";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { USER_API_END_POINT } from "@/utils/costent";
+import { setUser } from "@/redux/authSlice";
+import { toast } from "sonner";
 
 const UpdateProfileDailog = ({ open, setOpen }) => {
     const [loading, setLoading] = useState(false);
 
-    const { user } = useSelector(store => store.auth)
-
+    const { user } = useSelector(store => store.auth);
 
     const [input, setInput] = useState({
         fullName: user?.fullName,
@@ -24,89 +22,76 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
         phoneNumber: user?.phoneNumber,
         bio: user?.profile?.bio,
         skills: user?.profile?.skills?.map(skill => skill),
-        file: user?.profile?.resume
-    })
+        file: null, // Start with null to ensure validation checks
+    });
     const [errors, setErrors] = useState({});
 
     const validateForm = () => {
         const newErrors = {};
-        if (!input.file) newErrors.file = "*file is required";
+        if (!input.file) newErrors.file = "*File is required"; // Require file to be uploaded
         if (!/\S+@\S+\.\S+/.test(input.email)) newErrors.email = "*Invalid email";
         if (input.phoneNumber && !/^\d{10}$/.test(input.phoneNumber))
             newErrors.phoneNumber = "*Invalid phone number";
-
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-
     const changeEventHandler = (e) => {
-        setInput({ ...input, [e.target.name]: e.target.value })
-    }
+        setInput({ ...input, [e.target.name]: e.target.value });
+    };
 
     const fileChangeHandler = (e) => {
-        const file = e.target.files?.[0]
-        setInput({ ...input, file })
-    }
+        const file = e.target.files?.[0];
+        setInput({ ...input, file });
+    };
 
     const dispatch = useDispatch();
 
-    // const { token } = useSelector(store => store.auth);
     const token = useSelector(state => state.auth.token) || localStorage.getItem('authToken');
 
     const submitHandler = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
         if (!validateForm()) {
             return;
         }
         setLoading(true); // Start loading
 
-        const formData = new FormData()
-        formData.append("fullName", input.fullName)
-        formData.append("email", input.email)
-        formData.append("phoneNumber", input.phoneNumber)
-        formData.append("bio", input.bio)
-        formData.append("skills", input.skills)
+        const formData = new FormData();
+        formData.append("fullName", input.fullName);
+        formData.append("email", input.email);
+        formData.append("phoneNumber", input.phoneNumber);
+        formData.append("bio", input.bio);
+        formData.append("skills", input.skills);
 
         if (input.file) {
-            formData.append("file", input.file)
+            formData.append("file", input.file); // Only append if file is available
         }
 
         try {
-
             if (!token) {
-                throw new Error("User not authenticate, please login again.");
+                throw new Error("User not authenticated, please login again.");
             }
-            console.log({
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "multipart/form-data"
-            });
 
             const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
                 headers: {
                     "Authorization": `Bearer ${token || localStorage.getItem('authToken')}`, // Use token from Redux or localStorage
-                    "Content-Type": "multipart/form-data"
+                    "Content-Type": "multipart/form-data",
                 },
-            })
-
-            console.log('Response data:', res.data);
+            });
 
             if (res.data.success) {
-                dispatch(setUser(res.data.user))
-                toast.success(res.data.message)
+                dispatch(setUser(res.data.user));
+                toast.success(res.data.message);
             }
         } catch (error) {
-            console.log(error);
-            toast.error(error.response.data.message)
-
+            toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false); // Stop loading
             setOpen(false);
         }
-
-    }
+    };
 
     return (
         <div>
@@ -116,6 +101,7 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                         <DialogTitle>Update Profile</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={submitHandler}>
+                        {/* Full Name Field */}
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="name" className="text-right text-md">Name</Label>
@@ -131,6 +117,8 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Email Field */}
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="email" className="text-right text-md">Email</Label>
@@ -146,6 +134,8 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Phone Number Field */}
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="number" className="text-right text-md">Number</Label>
@@ -161,6 +151,8 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Bio Field */}
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="bio" className="text-right text-md">Bio</Label>
@@ -173,6 +165,8 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                 />
                             </div>
                         </div>
+
+                        {/* Skills Field */}
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="skills" className="text-right text-md">Skills</Label>
@@ -185,6 +179,8 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                 />
                             </div>
                         </div>
+
+                        {/* Resume Upload (File) */}
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="file" className="text-right text-md">Resume</Label>
@@ -201,6 +197,8 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Submit Button */}
                         <DialogFooter>
                             {loading ? (
                                 <Button className="w-full my-4">
@@ -216,7 +214,7 @@ const UpdateProfileDailog = ({ open, setOpen }) => {
                 </DialogContent>
             </Dialog>
         </div>
-    )
-}
+    );
+};
 
-export default UpdateProfileDailog
+export default UpdateProfileDailog;

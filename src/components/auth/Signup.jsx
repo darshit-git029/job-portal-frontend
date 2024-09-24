@@ -43,7 +43,7 @@ const Signup = () => {
     const newErrors = {};
     if (!input.fullName) newErrors.fullName = "*Full name is required";
     if (!input.email) newErrors.email = "*Email is required";
-    if (!/\S+@\S+\.\S+/.test(input.email)) newErrors.email = "*Invalid email";
+    if (!/\S+@\S+\.\S+/.test(input.email)) newErrors.email = "*Invalid email format";
     if (!input.phoneNumber) newErrors.phoneNumber = "*Phone number is required";
     if (input.phoneNumber && !/^\d{10}$/.test(input.phoneNumber))
       newErrors.phoneNumber = "*Invalid phone number";

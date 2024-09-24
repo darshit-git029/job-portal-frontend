@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import useGetAllJobs from "@/hooks/useGetAllJobs"
 import CategorySection from "./CategorySection"
 import Herosection from "./herosection"
