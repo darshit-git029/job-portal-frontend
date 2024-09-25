@@ -37,7 +37,7 @@ const CompanySetup = () => {
         if (!input.description.trim()) newErrors.description = "*Description is required";
         if (!input.location.trim()) newErrors.location = "*Location is required";
         if (!input.website.trim()) newErrors.website = "*Website is required";
-        if (!input.file) newErrors.file = "*Company logo is required";
+        // if (!input.file) newErrors.file = "*Company logo is required";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -66,7 +66,7 @@ const CompanySetup = () => {
         formData.append("location", input.location);
         if (input.file) {
             formData.append("file", input.file);
-        }
+        }else(console.log("no file upload"))
 
         try {
             setLoading(true);

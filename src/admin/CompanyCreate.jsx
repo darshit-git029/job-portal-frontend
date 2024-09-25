@@ -16,7 +16,6 @@ const CompanyCreate = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const [companyName, setComapnyName] = useState()
-
     const token = useSelector(state => state.auth.token) || localStorage.getItem('authToken');
 
     const registerNewComapny = async () => {
@@ -37,7 +36,7 @@ const CompanyCreate = () => {
                 toast.success(res.data.message)
             }
         } catch (error) {
-            toast.error(error.response.data.error)
+            toast.error(<p className="text-red-500 text-xs">{"Please insert company name to create company"}</p>)
             console.log(error);
         }
     }
@@ -57,6 +56,7 @@ const CompanyCreate = () => {
                     placeholder="Job hunt Microsoft etc."
                     onChange={(e) => setComapnyName(e.target.value)}
                 />
+
                 <div className="flex items-center gap-2 my-10">
                     <Button variant="outline" onClick={() => { navigate("/admin/companies") }}>Cancel</Button>
                     <Button onClick={registerNewComapny}>Continue</Button>

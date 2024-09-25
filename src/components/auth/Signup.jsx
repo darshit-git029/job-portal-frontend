@@ -12,12 +12,14 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import { setLoading } from "@/redux/authSlice";
+import PhoneInput from "react-phone-input-2"; // Import the PhoneInput component
+import 'react-phone-input-2/lib/style.css'; // Import styles
 
 const Signup = () => {
   const [input, setInput] = useState({
     fullName: "",
     email: "",
-    phoneNumber: "",
+    phoneNumber: "", // This will now hold the full phone number
     password: "",
     role: "",
     file: "",
@@ -39,14 +41,16 @@ const Signup = () => {
     setInput({ ...input, file: e.target.files?.[0] });
   };
 
+  const handlePhoneChange = (value) => {
+    setInput({ ...input, phoneNumber: value });
+  };
+
   const validateForm = () => {
     const newErrors = {};
     if (!input.fullName) newErrors.fullName = "*Full name is required";
     if (!input.email) newErrors.email = "*Email is required";
     if (!/\S+@\S+\.\S+/.test(input.email)) newErrors.email = "*Invalid email format";
     if (!input.phoneNumber) newErrors.phoneNumber = "*Phone number is required";
-    if (input.phoneNumber && !/^\d{10}$/.test(input.phoneNumber))
-      newErrors.phoneNumber = "*Invalid phone number";
     if (!input.password) newErrors.password = "*Password is required";
     if (input.password && input.password.length < 6)
       newErrors.password = "*Password must be at least 6 characters";
@@ -95,7 +99,7 @@ const Signup = () => {
   useEffect(() => {
     if (user) {
       navigate("/");
-      toast.error("you have already signup")
+      toast.error("You have already signed up");
     }
   }, []);
 
@@ -142,13 +146,11 @@ const Signup = () => {
 
           <div className="my-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              type="text"
+            <PhoneInput
+              country={"in"} // Set the default country code
               value={input.phoneNumber}
-              name="phoneNumber"
-              onChange={changeEventHandler}
-              id="phone"
-              placeholder="0000000000"
+              onChange={handlePhoneChange}
+              inputStyle={{ width: "100%", height: "38px" }} // Customize input styles if needed
             />
             {errors.phoneNumber && (
               <span className="text-red-500 text-sm">{errors.phoneNumber}</span>
