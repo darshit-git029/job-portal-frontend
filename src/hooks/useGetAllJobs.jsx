@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setAlljob } from "@/redux/jobSlice"; // Ensure this is correctly imported
+import { toast } from "sonner";
 
 const useGetAllJobs = () => {
     const token = useSelector(state => state.auth.token) || localStorage.getItem('authToken');
@@ -27,6 +28,7 @@ const useGetAllJobs = () => {
                 }
             } catch (error) {
                 console.error("Error fetching jobs:", error);
+                toast.error("Failed to fetch all jobs.")
             }
         };
 

@@ -3,6 +3,7 @@ import { APPLYJOB_API_END_POINT } from "@/utils/costent";
 import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 const useGetAppliedJobs = () => {
     const dispatch = useDispatch();
@@ -25,6 +26,8 @@ const useGetAppliedJobs = () => {
                 }
             } catch (error) {
                 console.log("Error fetching applied jobs:", error);
+                toast.error("Failed to fetch applied jobs.")
+
             }
         };
 

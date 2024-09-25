@@ -4,6 +4,7 @@ import {  REGISTERCOMPANY_API_END_POINT } from "@/utils/costent"
 import axios from "axios"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { toast } from "sonner"
 
 const useGetAllCompanies = () => {
     const token = useSelector(state => state.auth.token) || localStorage.getItem('authToken');
@@ -23,6 +24,7 @@ const useGetAllCompanies = () => {
                 }
             } catch (error) {
                 console.log(error);
+                toast.error("error to get all company.")
 
             }
         }

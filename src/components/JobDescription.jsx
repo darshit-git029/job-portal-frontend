@@ -14,7 +14,6 @@ import { toast } from "sonner"
 import Navbar from "./shared/navbar"
 
 const JobDescription = () => {
-    // const {user} = useSelector(store=>store.auth)
     const { singlejob } = useSelector(store => store.job)
     const { user } = useSelector(store => store.auth)
     const isInitiallyApplied = singlejob?.application?.some(application => application.applicant === user?._id) || false    
@@ -30,8 +29,6 @@ const JobDescription = () => {
     const applyjobApplication = async () => {
         try {
             if(user){
-
-            
             const res = await axios.get(`${APPLYJOB_API_END_POINT}/apply/${jobId}`, {
                 headers: {
                     "Authorization": `Bearer ${token || localStorage.getItem('authToken')}`, // Use token from Redux or localStorage
@@ -43,7 +40,8 @@ const JobDescription = () => {
                 const updateSingleJob = {...singlejob, application:[...singlejob.application,{applicant:user?._id}]}
                 dispatch(setSingleJob(updateSingleJob)) 
                 toast.success(res.data.message)
-            }}else(toast.error("Please Login to Apply for this job")
+            }}
+            else(toast.error("Please Login to Apply for this job")
             )
         } catch (error) {
             toast.error(error.response.data.message)
@@ -67,13 +65,11 @@ const JobDescription = () => {
                 }
             } catch (error) {
                 console.log(error);
-
+                toast.error("Failed to apply for the job. Please try again later.")
             }
         }
         fatchsinglejob();
     }, [jobId, dispatch, user?._id])
-
-
 
     return (
         
@@ -111,7 +107,6 @@ const JobDescription = () => {
                 <h1 className="my-2 font-bold">Salary: <span className="pl-4 font-normal text-gray-800">{singlejob?.salary} LPA</span></h1>
                 <h1 className="my-2 font-bold">Total Applicant: <span className="pl-4 font-normal text-gray-800">{singlejob?.application?.length}</span></h1>
                 <h1 className="my-2 font-bold">Posted Date: <span className="pl-4 font-normal text-gray-800">{singlejob?.createdAt.split("T")[0]}</span></h1>
-
             </div>
         </div>
     )
